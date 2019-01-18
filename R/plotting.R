@@ -2,13 +2,13 @@
 # 		  Dana-Farber Cancer Institute
 #		  Broad Institute
 # contact: <gavinha@gmail.com> or <gavinha@broadinstitute.org>
-# date:	  January 11, 2018
+# date:	  July 26, 2018
 
 # data is the output format of TITAN cytoBand = {T,
 # F} alphaVal = [0,1] geneAnnot is a dataframe with
 # 4 columns: geneSymbol, chr, start, stop spacing
 # is the distance between each track
-plotAllelicRatio <- function(dataIn, chr = NULL, geneAnnot = NULL,
+plotAllelicRatio <- function(dataIn, chr = c(1:22), geneAnnot = NULL,
     spacing = 4,  xlim = NULL, ...) {
     # color coding alphaVal <- ceiling(alphaVal * 255);
     # class(alphaVal) = 'hexmode'
@@ -20,8 +20,13 @@ plotAllelicRatio <- function(dataIn, chr = NULL, geneAnnot = NULL,
     names(lohCol) <- c("HOMD", "DLOH", "NLOH", "GAIN",
         "ALOH", "HET", "ASCNA", "BCNA", "UBCNA")
 
+	# use consistent chromosome naming convention
+  	chr <- as.character(chr)
+  	genomeStyle <- seqlevelsStyle(as.character(dataIn$Chr))[1]
+  	chr <- mapSeqlevels(chr, genomeStyle, drop = FALSE)[1, ]
+	
     dataIn <- copy(dataIn)
-    if (!is.null(chr)) {
+    if (!is.null(chr) && length(chr) == 1) {
         for (i in chr) {
             dataByChr <- dataIn[Chr == i]
             dataByChr <- dataByChr[TITANcall != "OUT"]
@@ -46,7 +51,8 @@ plotAllelicRatio <- function(dataIn, chr = NULL, geneAnnot = NULL,
             }
         }
     } else {
-        # plot for all chromosomes
+        # plot for all chromosomes specified
+        dataIn <- dataIn[Chr %in% chr, ]
         coord <- getGenomeWidePositions(dataIn[, Chr],
             dataIn[, Position])
         plot(coord$posns, as.numeric(dataIn[, AllelicRatio]),
@@ -66,7 +72,7 @@ plotAllelicRatio <- function(dataIn, chr = NULL, geneAnnot = NULL,
 # [0,1] geneAnnot is a dataframe with 4 columns:
 # geneSymbol, chr, start, stop spacing is the
 # distance between each track
-plotClonalFrequency <- function(dataIn, chr = NULL,
+plotClonalFrequency <- function(dataIn, chr = c(1:22),
     normal = NULL, geneAnnot = NULL, spacing = 4, xlim = NULL, ...) {
     # color coding
     lohCol <- c("#00FF00", "#006400", "#0000FF", "#8B0000",
@@ -75,6 +81,11 @@ plotClonalFrequency <- function(dataIn, chr = NULL,
     names(lohCol) <- c("HOMD", "DLOH", "NLOH", "GAIN",
         "ALOH", "HET", "ASCNA", "BCNA", "UBCNA", "AMP", "HLAMP")
 
+	# use consistent chromosome naming convention
+  	chr <- as.character(chr)
+  	genomeStyle <- seqlevelsStyle(as.character(dataIn$Chr))[1]
+  	chr <- mapSeqlevels(chr, genomeStyle, drop = FALSE)[1, ]
+	
     # get unique set of cluster and estimates table:
     # 1st column is cluster number, 2nd column is
     # clonal freq
@@ -97,7 +108,7 @@ plotClonalFrequency <- function(dataIn, chr = NULL,
                  CellularPrevalence == "NA", CellularPrevalence := 0]
 
     # plot per chromosome
-    if (!is.null(chr)) {
+    if (!is.null(chr) && length(chr) == 1) {
         for (i in chr) {
             ind <- dataToUse[, Chr] == as.character(i)
             dataByChr <- dataToUse[ind, ]
@@ -150,7 +161,10 @@ plotClonalFrequency <- function(dataIn, chr = NULL,
             }
         }
     } else {
-        # plot genome-wide
+        # plot for all chromosomes specified
+        ind <- dataIn[Chr %in% chr, which=TRUE]
+        dataIn <- dataIn[ind]
+        clonalFreq <- clonalFreq[ind]
         coord <- getGenomeWidePositions(dataIn[, Chr],
             dataIn[, Position])
         plot(coord$posns, clonalFreq[, CellularPrevalence], type = "h",
@@ -194,7 +208,7 @@ plotClonalFrequency <- function(dataIn, chr = NULL,
 # alphaVal = [0,1] geneAnnot is a dataframe with 4
 # columns: geneSymbol, chr, start, stop spacing is
 # the distance between each track
-plotCNlogRByChr <- function(dataIn, chr = NULL, segs = NULL, 
+plotCNlogRByChr <- function(dataIn, chr = c(1:22), segs = NULL, 
 	plotCorrectedCN = TRUE, geneAnnot = NULL,
     ploidy = NULL, normal = NULL, spacing = 4, alphaVal = 1, xlim = NULL, ...) {
     # color coding
@@ -207,13 +221,18 @@ plotCNlogRByChr <- function(dataIn, chr = NULL, segs = NULL,
     # col2rgb(c('green','darkgreen','blue','darkred','red','brightred'))
     names(cnCol) <- c(0:500)
 	
-	if (plotCorrectedCN && "Corrected_Copy_Number" %in% colnames(dataIn)){
-		binCN <- "Corrected_Copy_Number"
-		segCN <- "Corrected_Copy_Number"
-	}else{
-		binCN <- "CopyNumber"
-		segCN <- "Copy_Number"
-	}
+	# use consistent chromosome naming convention
+  	chr <- as.character(chr)
+  	genomeStyle <- seqlevelsStyle(as.character(dataIn$Chr))[1]
+  	chr <- mapSeqlevels(chr, genomeStyle, drop = FALSE)[1, ]
+	
+  	if (plotCorrectedCN && "Corrected_Copy_Number" %in% colnames(dataIn)){
+  		binCN <- "Corrected_Copy_Number"
+  		segCN <- "Corrected_Copy_Number"
+  	}else{
+  		binCN <- "CopyNumber"
+  		segCN <- "Copy_Number"
+  	}
 	
     dataIn <- copy(dataIn)
     ## adjust logR values for ploidy ##
@@ -229,7 +248,7 @@ plotCNlogRByChr <- function(dataIn, chr = NULL, segs = NULL,
 			}
     }
 
-    if (!is.null(chr)) {
+    if (!is.null(chr) && length(chr) == 1) {
         for (i in chr) {
             dataByChr <- dataIn[dataIn[, Chr] == i, ]
             dataByChr <- dataByChr[dataByChr[, TITANcall] != "OUT", ]
@@ -258,7 +277,8 @@ plotCNlogRByChr <- function(dataIn, chr = NULL, segs = NULL,
             }
         }
     } else {
-        # plot for all chromosomes
+        # plot for all chromosomes specified
+        dataIn <- dataIn[Chr %in% chr, ]
         coord <- getGenomeWidePositions(dataIn[, Chr], dataIn[, Position])
         plot(coord$posns, as.numeric(dataIn[, LogRatio]),
             col = cnCol[as.character(dataIn[, get(binCN)])],
@@ -269,6 +289,7 @@ plotCNlogRByChr <- function(dataIn, chr = NULL, segs = NULL,
         plotChrLines(dataIn[, Chr], coord$chrBkpt, par("yaxp")[1:2])
         #plot segments
 				if (!is.null(segs)){
+					segs.sample <- segs.sample[Chromosome %in% chr]
 					coordEnd <- getGenomeWidePositions(segs.sample[, Chromosome], segs.sample[, End_Position.bp.])
 					coordStart <- coordEnd$posns - (segs.sample[, End_Position.bp.] - segs.sample[, Start_Position.bp.] + 1)
 					xlim <- as.numeric(c(1, coordEnd$posns[length(coordEnd$posns)]))
@@ -285,7 +306,7 @@ plotCNlogRByChr <- function(dataIn, chr = NULL, segs = NULL,
 
 }
 
-plotSubcloneProfiles <- function(dataIn, chr = NULL, geneAnnot = NULL,
+plotSubcloneProfiles <- function(dataIn, chr = c(1:22), geneAnnot = NULL,
 	spacing = 4, xlim = NULL, ...){
 	args <- list(...)
 	lohCol <- c("#00FF00", "#006400", "#0000FF", "#8B0000",
@@ -294,6 +315,11 @@ plotSubcloneProfiles <- function(dataIn, chr = NULL, geneAnnot = NULL,
     names(lohCol) <- c("HOMD", "DLOH", "NLOH", "GAIN",
         "ALOH", "HET", "ASCNA", "BCNA", "UBCNA")
 
+	# use consistent chromosome naming convention
+  	chr <- as.character(chr)
+  	genomeStyle <- seqlevelsStyle(as.character(dataIn$Chr))[1]
+  	chr <- mapSeqlevels(chr, genomeStyle, drop = FALSE)[1, ]
+
     ## pull out params from dots ##
     if (!is.null(args$cex.axis)) cex.axis <- args$cex.axis else cex.axis <- 0.75
     if (!is.null(args$cex.lab)) cex.lab <- args$cex.lab else cex.lab <- 0.75
@@ -301,7 +327,7 @@ plotSubcloneProfiles <- function(dataIn, chr = NULL, geneAnnot = NULL,
     numClones <- sum(!is.na(unique(as.numeric(dataIn$ClonalCluster))))
     if (numClones == 0){ numClones <- 1 }
          # plot per chromosome
-    if (!is.null(chr)) {
+    if (!is.null(chr) && length(chr) == 1) {
         for (i in chr) {
             ind <- dataIn[, Chr == as.character(i)]
             dataByChr <- dataIn[ind, ]
@@ -318,7 +344,7 @@ plotSubcloneProfiles <- function(dataIn, chr = NULL, geneAnnot = NULL,
             # setup plot to include X number of clones (numClones)
             maxCN <- dataByChr[, max(CopyNumber)] + 1
             ylim <- c(0, numClones * (maxCN + 2) - 1)
-            plot(0, type = "n", xaxt = "n", ylab = "", xlab = "",
+            plot(0, type = "n", xaxt = "n", ylab = "", 
             	xlim = xlim, ylim = ylim, yaxt = "n", ...)
             axis(2, at = seq(ylim[1], ylim[2], 1), las = 1,
             	labels = rep(c(0:maxCN, "---"), numClones), cex.axis=cex.axis)
@@ -348,7 +374,8 @@ plotSubcloneProfiles <- function(dataIn, chr = NULL, geneAnnot = NULL,
             }
         }
     } else {
-        # plot genome-wide
+        # plot for all chromosomes specified
+        dataIn <- dataIn[Chr %in% chr, ]
         coord <- getGenomeWidePositions(dataIn[, Chr], dataIn[, Position])
         # setup plot to include X number of clones (numClones)
 		maxCN <- dataIn[, max(CopyNumber)] + 1
@@ -397,7 +424,7 @@ plotAllelicCN <- function(dataIn, resultType = "AllelicRatio",
     dataIn[, Allele.1 := get(resultType) * 2^LogRatio*ploidy]
     dataIn[, Allele.2 := (1 - get(resultType)) * 2^LogRatio*ploidy]
 
-    if (!is.null(chr)) {
+    if (!is.null(chr) && length(chr) == 1) {
         for (i in chr) {
             dataByChr <- dataIn[Chr == i, ]
             dataByChr <- dataByChr[dataByChr[, TITANcall] != "OUT", ]
@@ -427,7 +454,7 @@ plotAllelicCN <- function(dataIn, resultType = "AllelicRatio",
 
 plotSegmentMedians <- function(dataIn, resultType = "LogRatio",
                                plotType = "CopyNumber", plotCorrectedCN = TRUE, 
-                               chr = NULL, geneAnnot = NULL, ploidy = NULL, spacing = 4, alphaVal = 1, xlim = NULL, plot.new = FALSE, lwd = 8, ...){
+                               chr = c(1:22), geneAnnot = NULL, ploidy = NULL, spacing = 4, alphaVal = 1, xlim = NULL, plot.new = FALSE, lwd = 8, ...){
 
 	## check for the possible resultType to plot ##
 	if (!resultType %in% c("LogRatio", "AllelicRatio", "HaplotypeRatio")){
@@ -436,20 +463,26 @@ plotSegmentMedians <- function(dataIn, resultType = "LogRatio",
   if (!plotType %in% c("CopyNumber", "Ratio")){
     stop("plotSegmentMedians: plotType must be 'CopyNumber' or 'Ratio'")
   }
-	dataType <- c("Median_logR", "Median_Ratio", "Median_HaplotypeRatio")
-	names(dataType) <- c("LogRatio", "AllelicRatio", "HaplotypeRatio")
-	axisName <- c("Copy Number (log ratio)", "Allelic Ratio", "Haplotype Fraction")
-	names(axisName) <- c("LogRatio", "AllelicRatio", "HaplotypeRatio")
-	axisNameCN <- c("Copy Number", "Allelic Copy Number")
-	names(axisNameCN) <- c("LogRatio", "AllelicRatio")
-	colName <- c("Copy_Number","TITAN_call", "TITAN_call")
-	names(colName) <- c("LogRatio", "AllelicRatio", "HaplotypeRatio")
-
-	if (plotCorrectedCN && "Corrected_Copy_Number" %in% colnames(dataIn)){
-		colName[1] <- "Corrected_Copy_Number"
-	}
-
-	dataIn <- copy(dataIn)
+  
+  	# use consistent chromosome naming convention
+  	chr <- as.character(chr)
+  	genomeStyle <- seqlevelsStyle(as.character(dataIn$Chr))[1]
+  	chr <- mapSeqlevels(chr, genomeStyle, drop = FALSE)[1, ]
+  
+  	dataType <- c("Median_logR", "Median_Ratio", "Median_HaplotypeRatio")
+  	names(dataType) <- c("LogRatio", "AllelicRatio", "HaplotypeRatio")
+  	axisName <- c("Copy Number (log ratio)", "Allelic Ratio", "Haplotype Fraction")
+  	names(axisName) <- c("LogRatio", "AllelicRatio", "HaplotypeRatio")
+  	axisNameCN <- c("Copy Number", "Allelic Copy Number")
+  	names(axisNameCN) <- c("LogRatio", "AllelicRatio")
+  	colName <- c("Copy_Number","TITAN_call", "TITAN_call")
+  	names(colName) <- c("LogRatio", "AllelicRatio", "HaplotypeRatio")
+  
+  	if (plotCorrectedCN && "Corrected_Copy_Number" %in% colnames(dataIn)){
+  		colName[1] <- "Corrected_Copy_Number"
+  	}
+  
+  	dataIn <- copy(dataIn)
 	# color coding
     alphaVal <- ceiling(alphaVal * 255)
     class(alphaVal) = "hexmode"
@@ -491,7 +524,7 @@ plotSegmentMedians <- function(dataIn, resultType = "LogRatio",
     }
 
     # plot for specified chromosomes #
-	if (!is.null(chr)) {
+	if (!is.null(chr) && length(chr) == 1) {
     	for (i in chr) {
     		dataByChr <- dataIn[Chromosome == i, ]
         dataByChr <- dataByChr[TITAN_call != "OUT", ]
@@ -507,7 +540,7 @@ plotSegmentMedians <- function(dataIn, resultType = "LogRatio",
             value <- dataByChr[, MajorCN]
             value2 <- dataByChr[, MinorCN]
           }else{
-            value <- dataByChr[, Copy_Number]
+            value <- dataByChr[, get(colName[resultType])]
           }
         }else{
           value <- dataByChr[, get(dataType[resultType])]
@@ -532,7 +565,8 @@ plotSegmentMedians <- function(dataIn, resultType = "LogRatio",
         }
     	}
     } else {
-        # plot for all chromosomes
+        # plot for all chromosomes specified
+        dataIn <- dataIn[Chromosome %in% chr, ]
         coordEnd <- getGenomeWidePositions(dataIn[, Chromosome], dataIn[, End_Position.bp.])
     	  coordStart <- coordEnd$posns - (dataIn[, End_Position.bp.] - dataIn[, Start_Position.bp.] + 1)
         xlim <- as.numeric(c(1, coordEnd$posns[length(coordEnd$posns)]))
@@ -600,26 +634,174 @@ plotChrLines <- function(chrs, chrBkpt, yrange) {
     }
     numLines <- length(chrBkpt)
     mid <- (chrBkpt[1:(numLines - 1)] + chrBkpt[2:numLines])/2
-    chrs[chrs == "X"] <- 23
-    chrs[chrs == "Y"] <- 24
-    chrsToShow <- sort(unique(as.numeric(chrs)))
-    chrsToShow[chrsToShow == 23] <- "X"
-    chrsToShow[chrsToShow == 24] <- "Y"
+    chrsToShow <- gsub("chr", "", unique(chrs))
     axis(side = 1, at = mid, labels = c(chrsToShow),
         cex.axis = 1.5, tick = FALSE)
 }
 
-getGenomeWidePositions <- function(chrs, posns) {
+getGenomeWidePositions <- function(chrs, posns, seqinfo = NULL) {
     # create genome coordinate scaffold
     positions <- as.numeric(posns)
     chrsNum <- unique(chrs)
     chrBkpt <- rep(0, length(chrsNum) + 1)
+    prevChrPos <- 0
     for (i in 2:length(chrsNum)) {
         chrInd <- which(chrs == chrsNum[i])
-        prevChrPos <- positions[chrInd[1] - 1]
+        if (!is.null(seqinfo)){
+        	prevChrPos <- seqinfo[i-1, "seqlengths"] + prevChrPos
+        }else{
+        	prevChrPos <- positions[chrInd[1] - 1]
+        }
         chrBkpt[i] = prevChrPos
         positions[chrInd] = positions[chrInd] + prevChrPos
     }
     chrBkpt[i + 1] <- positions[length(positions)]
     return(list(posns = positions, chrBkpt = chrBkpt))
+}
+
+
+### modify SNPchip function "plotIdiogram"
+plotIdiogram.hg38 <- function (chromosome, cytoband, seqinfo, cytoband.ycoords, xlim,
+    ylim = c(0, 2), new = TRUE, label.cytoband = TRUE, label.y = NULL,
+    srt, cex.axis = 1, outer = FALSE, taper = 0.15, verbose = FALSE,
+    unit = c("bp", "Mb"), is.lattice = FALSE, ...)
+{
+    def.par <- par(no.readonly = TRUE, mar = c(4.1, 0.1, 3.1,
+        2.1))
+    on.exit(def.par)
+    if (is.lattice) {
+        segments <- lsegments
+        polygon <- lpolygon
+    }
+  
+    cytoband <- cytoband[cytoband[, "chrom"] == chromosome, ]
+    unit <- match.arg(unit)
+    if (unit == "Mb") {
+        cytoband$start <- cytoband$start/1e+06
+        cytoband$end <- cytoband$end/1e+06
+    }
+    if (missing(cytoband.ycoords)) {
+        cytoband.ycoords <- ylim
+    }
+    rownames(cytoband) <- as.character(cytoband[, "name"])
+    sl <- seqlengths(seqinfo)[chromosome]
+    if (missing(xlim))
+        xlim <- c(0, sl)
+    if (unit == "Mb")
+        xlim <- xlim/1e+06
+    cytoband_p <- cytoband[grep("^p", rownames(cytoband), value = TRUE),
+        ]
+    cytoband_q <- cytoband[grep("^q", rownames(cytoband), value = TRUE),
+        ]
+    p.bands <- nrow(cytoband_p)
+    cut.left <- c()
+    cut.right <- c()
+    for (i in seq_len(nrow(cytoband))) {
+        if (i == 1) {
+            cut.left[i] <- TRUE
+            cut.right[i] <- FALSE
+        }
+        else if (i == p.bands) {
+            cut.left[i] <- FALSE
+            cut.right[i] <- TRUE
+        }
+        else if (i == (p.bands + 1)) {
+            cut.left[i] <- TRUE
+            cut.right[i] <- FALSE
+        }
+        else if (i == nrow(cytoband)) {
+            cut.left[i] <- FALSE
+            cut.right[i] <- TRUE
+        }
+        else {
+            cut.left[i] <- FALSE
+            cut.right[i] <- FALSE
+        }
+    }
+      for (i in seq_len(nrow(cytoband))) {
+        if (as.character(cytoband[i, "gieStain"]) == "stalk") {
+            cut.right[i - 1] <- TRUE
+            cut.left[i] <- NA
+            cut.right[i] <- NA
+            cut.left[i + 1] <- TRUE
+        }
+    }
+    include <- cytoband[, "end"] > xlim[1] & cytoband[, "start"] <
+        xlim[2]
+    cytoband <- cytoband[include, ]
+    N <- nrow(cytoband)
+    cut.left <- cut.left[include]
+    cut.right <- cut.right[include]
+    if (new) {
+        xx <- c(0, cytoband[nrow(cytoband), "end"])
+        yy <- cytoband.ycoords
+        plot(xx, yy, xlim = xlim, type = "n", xlab = "", ylab = "",
+            axes = FALSE, yaxs = "i", ylim = ylim, ...)
+    }
+    top <- cytoband.ycoords[2]
+    bot <- cytoband.ycoords[1]
+    h <- top - bot
+    p <- taper
+    for (i in seq_len(nrow(cytoband))) {
+        start <- cytoband[i, "start"]
+        last <- cytoband[i, "end"]
+        delta = (last - start)/4
+        getStain <- function(stain) {
+            switch(stain, gneg = "grey100", gpos25 = "grey90",
+                gpos50 = "grey70", gpos75 = "grey40", gpos100 = "grey0",
+                gvar = "grey100", stalk = "brown3", acen = "brown4",
+                "white")
+        }
+        color <- getStain(as.character(cytoband[i, "gieStain"]))
+        if (is.na(cut.left[i]) & is.na(cut.right[i])) {
+            delta <- (last - start)/3
+            segments(start + delta, cytoband.ycoords[1], start +
+                delta, cytoband.ycoords[2])
+            segments(last - delta, cytoband.ycoords[1], last -
+                delta, cytoband.ycoords[2])
+        }
+        else if (cut.left[i] & cut.right[i]) {
+            yy <- c(bot + p * h, bot, bot, bot + p * h, top -
+                p * h, top, top, top - p * h)
+            polygon(c(start, start + delta, last - delta, last,
+                last, last - delta, start + delta, start), yy,
+                col = color)
+        }
+        else if (cut.left[i]) {
+            yy <- c(bot + p * h, bot, bot, top, top, top - p *
+                h)
+            polygon(c(start, start + delta, last, last, start +
+                delta, start), yy, col = color)
+        }
+          else if (cut.right[i]) {
+            yy <- c(bot, bot, bot + p * h, top - p * h, top,
+                top)
+            polygon(c(start, last - delta, last, last, last -
+                delta, start), yy, col = color)
+        }
+        else {
+            polygon(c(start, last, last, start), c(bot, bot,
+                top, top), col = color)
+        }
+    }
+     my.x <- (cytoband[, "start"] + cytoband[, "end"])/2
+    if (label.cytoband & !is.lattice) {
+        if (is.null(label.y)) {
+            axis(1, at = my.x, labels = rownames(cytoband), outer = outer,
+                cex.axis = cex.axis, line = 1, las = 3, tick = FALSE)
+            axis(1, at = cytoband$start, outer = outer, cex.axis = cex.axis,
+                line = 1, las = 3, labels = FALSE)
+        }
+        else {
+            if (!is.numeric(label.y)) {
+                warning("label.y must be numeric -- using default y coordinates for cytoband labels")
+                label.y <- bot - p * h
+            }
+            if (missing(srt))
+                srt <- 90
+            text(x = my.x, y = rep(label.y, length(my.x)), labels = rownames(cytoband),
+                srt = srt)
+        }
+    }
+    return()
 }
