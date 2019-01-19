@@ -1,5 +1,5 @@
-configfile: "config/config.yaml"
-configfile: "config/samples.yaml"
+configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/config.yaml"
+configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/samples.yaml"
 
 ## USERS MUST MODIFY THIS TO CHOSE THE CHROMOSOME NAMING
 # use this line if using NCBI naming

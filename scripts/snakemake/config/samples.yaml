@@ -1,7 +1,7 @@
 samples:
-  tumor_sample_1:  /path/to/bam/tumor.bam
-  normal_sample_1:  /path/to/bam/normal.bam
+  tumor1:  /mnt/scratch/bam/test_tumor.bam
+  normal1:  /mnt/scratch/bam/test_normal.bam
 
 
 pairings:
-  tumor_sample_1:  normal_sample_1
+  tumor1:  normal1

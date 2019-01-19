@@ -1,13 +1,15 @@
-configfile: "config/config.yaml"
-configfile: "config/samples.yaml"
+configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/config.yaml"
+configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/samples.yaml"
 
-include: "ichorCNA.snakefile"
-include: "getAlleleCounts.snakefile"
+## TODO: prefer setting workdir via commandline instead of hardcoding in config file
+workdir: config["workdir"]
+
+include: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/ichorCNA.snakefile"
+include: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/getAlleleCounts.snakefile"
 import os.path
 
 CLUST = {1:[1], 2:[1,2], 3:[1,2,3], 4:[1,2,3,4], 5:[1,2,3,4,5], 6:[1,2,3,4,5,6], 7:[1,2,3,4,5,6,7], 8:[1,2,3,4,5,6,7,8], 9:[1,2,3,4,5,6,7,8,9], 10:[1,2,3,4,5,6,7,8,9,10]}
 PLOIDY = {2:[2], 3:[2,3], 4:[2,3,4]}
-
 
 rule all:
 	input: 
@@ -17,7 +19,7 @@ rule all:
 		
 rule makeOutDir:
 	output:
-		"results/titan/hmm/titanCNA_ploidy{ploidy}/"
+		"results/titan/hmm/titanCNA_ploidy{ploidy}/madeoutdir.txt"
 	params:
 		mem=config["std_mem"],
 		runtime=config["std_runtime"],

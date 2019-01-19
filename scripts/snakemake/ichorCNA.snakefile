@@ -1,5 +1,5 @@
-configfile: "config/config.yaml"
-configfile: "config/samples.yaml"
+configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/config.yaml"
+configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/samples.yaml"
 
 rule correctDepth:
   input: 
@@ -11,7 +11,8 @@ rule read_counter:
 	input:
 		lambda wildcards: config["samples"][wildcards.samples]
 	output:
-		"results/readDepth/{samples}.bin{binSize}.wig"		
+		mywig="results/readDepth/{samples}.bin{binSize}.wig",
+		done="results/readDepth/{samples}.bin{binSize}.done"	
 	params:
 		readCounter=config["readCounterScript"],
 		binSize=config["binSize"],
@@ -25,7 +26,10 @@ rule read_counter:
 	log:
 		"logs/readDepth/{samples}.bin{binSize}.log"
 	shell:
-		"{params.readCounter} {input} -c {params.chrs} -w {params.binSize} -q {params.qual} > {output} 2> {log}"
+		"""
+		{params.readCounter} {input} -c {params.chrs} -w {params.binSize} -q {params.qual} > {output} 2> {log}
+		echo "read_counter done" > {output.done} 2> {log}
+		"""
 
 rule ichorCNA:
 	input:
@@ -38,7 +42,7 @@ rule ichorCNA:
 		#segTxt="results/ichorCNA/{tumor}/{tumor}.seg.txt",
 		#seg="results/ichorCNA/{tumor}/{tumor}.seg",
 		#rdata="results/ichorCNA/{tumor}/{tumor}.RData",
-		outDir="results/ichorCNA/{tumor}/",
+		outDir="results/ichorCNA/{tumor}/made_ichorCNAdir.txt",
 	params:
 		rscript=config["ichorCNA_rscript"],
 		libdir=config["ichorCNA_libdir"],
@@ -65,10 +69,11 @@ rule ichorCNA:
 		plotYlim=config["ichorCNA_plotYlim"],
 		mem=config["ichorCNA_mem"],
 		runtime=config["ichorCNA_runtime"],
-		pe=config["ichorCNA_pe"]
+		pe=config["ichorCNA_pe"],
+		outDir="results/ichorCNA/{tumor}"
 	resources:
 		mem=4
 	log:
 		"logs/ichorCNA/{tumor}.log"	
 	shell:
-		"Rscript {params.rscript} --libdir {params.libdir} --id {params.id} --WIG {input.tum} --gcWig {params.gcwig} --mapWig {params.mapwig} --NORMWIG {input.norm} --ploidy \"{params.ploidy}\" --normal \"{params.normal}\" --maxCN {params.maxCN} --includeHOMD {params.includeHOMD} --genomeStyle {params.genomeStyle} --chrs \"{params.chrs}\" --estimateNormal {params.estimateNormal} --estimatePloidy {params.estimatePloidy} --estimateScPrevalence {params.estimateClonality} --scStates \"{params.scStates}\" --centromere {params.centromere} --exons.bed {params.exons} --txnE {params.txnE} --txnStrength {params.txnStrength} --fracReadsInChrYForMale {params.fracReadsChrYMale} --plotFileType {params.plotFileType} --plotYLim \"{params.plotYlim}\" --outDir {output.outDir} > {log} 2> {log}"
+		"mkdir -p {params.outDir} && touch {output.outDirFile} && Rscript {params.rscript} --libdir {params.libdir} --id {params.id} --WIG {input.tum} --gcWig {params.gcwig} --mapWig {params.mapwig} --NORMWIG {input.norm} --ploidy \"{params.ploidy}\" --normal \"{params.normal}\" --maxCN {params.maxCN} --includeHOMD {params.includeHOMD} --genomeStyle {params.genomeStyle} --chrs \"{params.chrs}\" --estimateNormal {params.estimateNormal} --estimatePloidy {params.estimatePloidy} --estimateScPrevalence {params.estimateClonality} --scStates \"{params.scStates}\" --centromere {params.centromere} --exons.bed {params.exons} --txnE {params.txnE} --txnStrength {params.txnStrength} --fracReadsInChrYForMale {params.fracReadsChrYMale} --plotFileType {params.plotFileType} --plotYLim \"{params.plotYlim}\" --outDir {output.outDir} > {log} 2> {log}"
