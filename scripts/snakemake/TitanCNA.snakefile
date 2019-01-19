@@ -68,7 +68,7 @@ rule runTitanCNA:
 				
 rule selectSolution:
 	input:
-		ploidyDirs=expand("results/titan/hmm/titanCNA_ploidy{ploidy}/", ploidy=PLOIDY[config["TitanCNA_maxPloidy"]]),
+		ploidyDirs=expand("results/titan/hmm/titanCNA_ploidy{ploidy}/madeoutdir.txt", ploidy=PLOIDY[config["TitanCNA_maxPloidy"]]),
 		resultFiles=expand("results/titan/hmm/titanCNA_ploidy{ploidy}/{tumor}_cluster{clustNum}.titan.txt", tumor=config["pairings"], clustNum=CLUST[config["TitanCNA_maxNumClonalClusters"]], ploidy=PLOIDY[config["TitanCNA_maxPloidy"]])
 	output:
 		"results/titan/hmm/optimalClusterSolution.txt"
