@@ -15,7 +15,7 @@ samTools:  /opt/miniconda/bin/samtools
 ## path to scripts ##
 readCounterScript:  /mnt/evocore/configs/bin/readCounter
 ichorCNA_rscript:  /mnt/evocore/repos/ichorCNA/scripts/runIchorCNA.R
-ichorCNA_libdir:  /mnt/evocore/repos/ichorCNA/R/
+ichorCNA_libdir:  /mnt/evocore/repos/ichorCNA/
 pyCountScript:  /mnt/evocore/repos/TitanCNA/scripts/snakemake/code/countPysam.py
 TitanCNA_rscript: /mnt/evocore/repos/TitanCNA/scripts/R_scripts/titanCNA.R
 TitanCNA_selectSolutionRscript: /mnt/evocore/repos/TitanCNA/scripts/R_scripts/selectSolution.R

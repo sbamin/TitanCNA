@@ -25,7 +25,7 @@ rule makeOutDir:
 		runtime=config["std_runtime"],
 		pe=config["std_numCores"]
 	shell:
-		"mkdir -p {output}"
+		"echo 'make dummy output' > {output}"
 		
 rule runTitanCNA:
 	input:
