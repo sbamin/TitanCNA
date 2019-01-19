@@ -4,6 +4,27 @@
 ## Samir B. Amin, @sbamin
 ## Sandeep Namburi, @snamburi3
 
+# usage
+show_help() {
+cat << EOF
+
+Wrapper to run TitanCNA on DNA Nexus platform
+
+## Note that all paths are internal to docker container, and not the actual path on the docker host machine.
+## To map respective host volume, docker run with -v /host/user/scratch:/mnt/scratch -v /host/user/configs:/mnt/evocore arguments.
+
+	-i path to config file - used to override snakemake configs
+	-s sample barcode - used for making workdir, output files, etc. (default: tumor1)
+	-t path to tumor bam
+	-n path to normal bam
+	-m run mode - DRY|RUN (default: DRY)
+	-c max number of jobs to run in parallel (default: 4)
+
+Example: ${0##*/} -s tumor1 -i /mnt/evocore/configs/config.yaml -t /mnt/scratch/bam/test_tumor.bam -n /mnt/scratch/bam/test_normal.bam -m DRY -c 4
+
+EOF
+}
+
 if [[ $# == 0 ]];then show_help;exit 1;fi
 
 while getopts "i:c:s:t:n:m:h" opt; do
