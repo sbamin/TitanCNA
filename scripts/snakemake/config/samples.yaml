@@ -1,6 +1,6 @@
 samples:
-  tumor1:  /mnt/scratch/bam/test_tumor.bam
-  normal1:  /mnt/scratch/bam/test_normal.bam
+  tumor1:  /mnt/scratch/bam/tumor_bam/test_tumor.bam
+  normal1:  /mnt/scratch/bam/normal_bam/test_normal.bam
 
 
 pairings:
