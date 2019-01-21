@@ -88,10 +88,11 @@ fi
 ## Number of jobs to run in parallel
 NCORES=${NCORES:-4}
 
+SAMPLEID=${SAMPLEID:-"tumor1"}
+
 ###### UNUSED FOR NOW ######
 ## Instead, override config/samples.yaml using CONFIGFILE option
 ## default sample as given in config/samples.yaml
-SAMPLEID=${SAMPLEID:-"tumor1"}
 TMBAM=${TMBAM:-"/mnt/scratch/bam/tumor_bam/test_tumor.bam"}
 NRBAM=${NRBAM:-"/mnt/scratch/bam/normal_bam/test_normal.bam"}
 
