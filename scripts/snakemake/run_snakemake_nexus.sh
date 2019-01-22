@@ -145,8 +145,8 @@ if [[ "$MODE" != "RUN" ]]; then
 	
 	snakemake -s TitanCNA.snakefile -n -d "$SMK_WORKDIR" --cores "$NCORES" --latency-wait 60 --max-jobs-per-second 1 --configfile "$CONFIGFILE" --rerun-incomplete -r -p --stats smk_run_sjc_titan_"$TSTAMP".json |& tee -a "$SMK_WORKDIR"/run_sjc_titan_"$TSTAMP".log
 else
-	snakemake --rulegraph -s TitanCNA.snakefile | dot -Tpng >| "$SMK_WORKDIR"/sjc_titan_flow_"$TSTAMP".png && \
-	snakemake --dag -s TitanCNA.snakefile | dot -Tpdf >| "$SMK_WORKDIR"/sjc_titan_dag_"$TSTAMP".pdf && \
+	snakemake --rulegraph --configfile "$CONFIGFILE" -s TitanCNA.snakefile | dot -Tpng >| "$SMK_WORKDIR"/sjc_titan_flow_"$TSTAMP".png && \
+	snakemake --dag --configfile "$CONFIGFILE" -s TitanCNA.snakefile | dot -Tpdf >| "$SMK_WORKDIR"/sjc_titan_dag_"$TSTAMP".pdf && \
 	printf "LOGGER\t%s\t%s\tsjc_titan\tSTART\t%s\n" "$TSTAMP" "$SAMPLEID" "$SMK_WORKDIR" | tee -a "$SMK_BASEDIR"/runstats/runstats.tsv && \
 	snakemake -s TitanCNA.snakefile -d "$SMK_WORKDIR" --cores "$NCORES" --latency-wait 60 --max-jobs-per-second 1 --configfile "$CONFIGFILE" --rerun-incomplete -r -p --stats smk_run_sjc_titan_"$TSTAMP".json |& tee -a "$SMK_WORKDIR"/run_sjc_titan_"$TSTAMP".log && \
 	EXITSTAT=$? && \
