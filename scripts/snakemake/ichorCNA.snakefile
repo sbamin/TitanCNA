@@ -1,5 +1,6 @@
 configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/config.yaml"
-configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/samples.yaml"
+## samples.yaml comes from mounted device and given as an argument in run_snakemake wrapper
+# configfile: "/mnt/scratch/run_config/samples.yaml"
 
 rule correctDepth:
   input: 

@@ -75,6 +75,8 @@ if [[ ! -f "$CONFIGFILE" ]]; then
 	echo -e "ERROR: Inaccesible config file at $CONFIGFILE\nProvide container and not host path to configfile at -i flag.\n" >&2
 	show_help
 	exit 1
+else
+	echo "INFO: Found config file at $CONFIGFILE"
 fi
 
 ## set to RUN to disable dry mode
@@ -123,10 +125,8 @@ Workdir: $SMK_WORKDIR
 User config: $CONFIGFILE
 MODE: $MODE
 
-PS: Sample stats are optional, and may have been
-supplied via config file.
-
 SAMPLE: $SAMPLEID
+## TMBAM and NRBAM are unused variables for now, and instead inherited from user config file.
 TMBAM: $TMBAM
 NRBAM: $NRBAM
 
@@ -143,12 +143,12 @@ if [[ "$MODE" != "RUN" ]]; then
 	echo "Running snakemake in dry run"
 	sleep 1
 	
-	snakemake -s TitanCNA.snakefile -n --cores "$NCORES" --latency-wait 60 --max-jobs-per-second 1 --configfile "$CONFIGFILE" --rerun-incomplete -r -p --stats smk_run_sjc_titan_"$TSTAMP".json |& tee -a "$SMK_WORKDIR"/run_sjc_titan_"$TSTAMP".log
+	snakemake -s TitanCNA.snakefile -n -d "$SMK_WORKDIR" --cores "$NCORES" --latency-wait 60 --max-jobs-per-second 1 --configfile "$CONFIGFILE" --rerun-incomplete -r -p --stats smk_run_sjc_titan_"$TSTAMP".json |& tee -a "$SMK_WORKDIR"/run_sjc_titan_"$TSTAMP".log
 else
 	snakemake --rulegraph -s TitanCNA.snakefile | dot -Tpng >| "$SMK_WORKDIR"/sjc_titan_flow_"$TSTAMP".png && \
 	snakemake --dag -s TitanCNA.snakefile | dot -Tpdf >| "$SMK_WORKDIR"/sjc_titan_dag_"$TSTAMP".pdf && \
 	printf "LOGGER\t%s\t%s\tsjc_titan\tSTART\t%s\n" "$TSTAMP" "$SAMPLEID" "$SMK_WORKDIR" | tee -a "$SMK_BASEDIR"/runstats/runstats.tsv && \
-	snakemake -s TitanCNA.snakefile --cores "$NCORES" --latency-wait 60 --max-jobs-per-second 1 --configfile "$CONFIGFILE" --rerun-incomplete -r -p --stats smk_run_sjc_titan_"$TSTAMP".json |& tee -a "$SMK_WORKDIR"/run_sjc_titan_"$TSTAMP".log && \
+	snakemake -s TitanCNA.snakefile -d "$SMK_WORKDIR" --cores "$NCORES" --latency-wait 60 --max-jobs-per-second 1 --configfile "$CONFIGFILE" --rerun-incomplete -r -p --stats smk_run_sjc_titan_"$TSTAMP".json |& tee -a "$SMK_WORKDIR"/run_sjc_titan_"$TSTAMP".log && \
 	EXITSTAT=$? && \
 	printf "LOGGER\t%s\t%s\tsjc_titan\tEND\t%s\n" "$TSTAMP" "$SAMPLEID" "$EXITSTAT" | tee -a "$SMK_BASEDIR"/runstats/runstats.tsv
 fi

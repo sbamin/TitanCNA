@@ -2,8 +2,8 @@
 #### path to store results ####
 ## Note that following paths are internal to docker container, and can not be edited
 ## To map respective host volume, docker run with -v <path in host scratch>:/mnt/scratch -v <path in host evocore>:/mnt/evocore arg
-## override at run command to provide sample-specific workdir
-workdir: "/mnt/scratch/snakemake/sjc_titan/tumor1"
+## workdir is given at the run command to provide sample-specific workdir
+# workdir: "/mnt/scratch/snakemake/sjc_titan/tumor1"
 ## snakemake dir: snakemake must run from this dir
 smk_home: "/mnt/evocore/repos/TitanCNA/scripts/snakemake"
 ## tmp dir
