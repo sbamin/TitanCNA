@@ -2,8 +2,8 @@ configfile: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/config/config.yaml"
 ## samples.yaml comes from mounted device and given as an argument in run_snakemake wrapper
 # configfile: "/mnt/scratch/run_config/samples.yaml"
 
-## TODO: prefer setting workdir via commandline instead of hardcoding in config file
-workdir: config["workdir"]
+## Done: Prefer setting workdir via commandline instead of hardcoding in config file
+# workdir: config["workdir"]
 
 include: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/ichorCNA.snakefile"
 include: "/mnt/evocore/repos/TitanCNA/scripts/snakemake/getAlleleCounts.snakefile"
